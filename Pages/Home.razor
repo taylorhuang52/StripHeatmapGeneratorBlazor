@@ -1,0 +1,164 @@
+@page "/"
+@inject CsvParserService     CsvParser
+@inject StripRendererService Renderer
+@inject IJSRuntime           JS
+
+<PageTitle>Strip Heatmap Generator</PageTitle>
+
+<div class="toolbar">
+    <!-- CSV -->
+    <div class="toolbar-group">
+        <label class="toolbar-label">CSV 檔案</label>
+        <InputFile OnChange="HandleCsvSelected" accept=".csv" class="file-input" id="csvInput" />
+        <label for="csvInput" class="btn btn-browse">瀏覽…</label>
+        <span class="file-name">@(_csvFileName ?? "未選擇")</span>
+    </div>
+
+    <!-- 參數 -->
+    <div class="toolbar-group">
+        <label class="toolbar-label">參數</label>
+        <select @bind="_selectedParam" @bind:after="OnParamChanged" class="select-param">
+            @foreach (var p in _paramColumns)
+            { <option value="@p">@p</option> }
+        </select>
+    </div>
+
+    <!-- 規格限制 -->
+    <div class="toolbar-group">
+        <label class="toolbar-label">規格限制</label>
+        <input type="checkbox" @bind="_useLo" /> 下限
+        <input type="number" @bind="_loValue" disabled="@(!_useLo)" step="0.01" class="limit-input" />
+        <span>~</span>
+        <input type="checkbox" @bind="_useHi" /> 上限
+        <input type="number" @bind="_hiValue" disabled="@(!_useHi)" step="0.01" class="limit-input" />
+    </div>
+
+    <!-- Cell 尺寸 -->
+    <div class="toolbar-group">
+        <label class="toolbar-label">Cell W</label>
+        <input type="number" @bind="_cellW" min="4" max="80" class="size-input" />
+        <label class="toolbar-label">H</label>
+        <input type="number" @bind="_cellH" min="4" max="60" class="size-input" />
+        <label class="toolbar-label">字型</label>
+        <input type="number" @bind="_fontSize" min="4" max="20" class="size-input" />
+    </div>
+
+    <button class="btn btn-render" @onclick="RenderAsync"
+            disabled="@(_csvData is null || _rendering)">
+        @(_rendering ? "渲染中…" : "▶ Render")
+    </button>
+    <button class="btn btn-export" @onclick="ExportPng"
+            disabled="@(!_rendered)">💾 Export PNG</button>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+    @foreach (var kv in HeatmapConfig.BinColors.OrderBy(k => k.Key))
+    {
+        <span class="legend-item">
+            <span class="swatch"
+                  style="background:rgb(@kv.Value.R,@kv.Value.G,@kv.Value.B)"></span>
+            Bin@(kv.Key) @(HeatmapConfig.BinLabels.GetValueOrDefault(kv.Key, ""))
+        </span>
+    }
+    <span class="legend-item">
+        <span class="swatch" style="background:rgb(210,210,210)"></span>Out of spec
+    </span>
+    <span class="legend-item">
+        <span class="swatch swatch-border"></span>No data
+    </span>
+</div>
+
+@if (!string.IsNullOrEmpty(_status))
+{
+    <div class="status @(_isError ? "status-error" : "status-ok")">@_status</div>
+}
+
+<!-- Off-screen canvas used for rendering; img shows the result -->
+<div class="preview-area">
+    <canvas id="heatmapCanvas" style="display:none"></canvas>
+    @if (_rendered)
+    {
+        <img id="heatmapImg" class="heatmap-img" alt="Strip Heatmap" />
+    }
+    else
+    {
+        <div class="preview-hint">請先選擇 CSV 檔案，然後按 ▶ Render</div>
+    }
+</div>
+
+@code {
+    private CsvLoadResult? _csvData;
+    private string?        _csvFileName;
+    private byte[]?        _csvBytes;
+    private List<string>   _paramColumns  = new();
+    private string         _selectedParam = "";
+    private bool           _useLo, _useHi;
+    private double         _loValue = 1.5, _hiValue = 6.0;
+    private int            _cellW    = HeatmapConfig.DefaultCellW;
+    private int            _cellH    = HeatmapConfig.DefaultCellH;
+    private int            _fontSize = HeatmapConfig.DefaultFontSz;
+    private bool           _rendered, _rendering, _isError;
+    private string         _status = "";
+
+    private async Task HandleCsvSelected(InputFileChangeEventArgs e)
+    {
+        _csvFileName = e.File.Name;
+        _status = "讀取 CSV…"; _isError = false;
+        StateHasChanged();
+        try
+        {
+            using var ms = new MemoryStream();
+            await e.File.OpenReadStream(50 * 1024 * 1024).CopyToAsync(ms);
+            _csvBytes = ms.ToArray();
+            _csvData  = await CsvParser.ParseAsync(new MemoryStream(_csvBytes));
+            _paramColumns  = _csvData.ParamColumns;
+            _selectedParam = _paramColumns.FirstOrDefault() ?? "";
+            OnParamChanged();
+            int total = _csvData.Strips.Values.Sum(l => l.Count);
+            _status = $"✔ 已載入 {_csvData.Strips.Count} 個 strip，共 {total} 個 die";
+        }
+        catch (Exception ex) { _isError = true; _status = $"❌ {ex.Message}"; }
+    }
+
+    private void OnParamChanged()
+    {
+        if (HeatmapConfig.ParamLimits.TryGetValue(_selectedParam, out var lim))
+        { _loValue = lim.Lo; _hiValue = lim.Hi; _useLo = _useHi = true; }
+        else { _useLo = _useHi = false; }
+    }
+
+    private async Task RenderAsync()
+    {
+        if (_csvData is null || _csvBytes is null) return;
+        _rendering = true; _status = $"Rendering {_selectedParam}…";
+        StateHasChanged();
+        try
+        {
+            await CsvParser.LoadParamValuesAsync(
+                new MemoryStream(_csvBytes), _selectedParam,
+                _csvData.Strips, _csvData.Headers);
+
+            double? lo = _useLo ? _loValue : null;
+            double? hi = _useHi ? _hiValue : null;
+            string  fb = Path.GetFileNameWithoutExtension(_csvFileName ?? "result");
+
+            var spec = Renderer.BuildSpec(
+                _csvData.Strips, _selectedParam, fb, lo, hi, _cellW, _cellH, _fontSize);
+
+            // Send draw commands to JS → canvas → img
+            await JS.InvokeVoidAsync("stripHeatmap.render", spec, "heatmapCanvas", "heatmapImg");
+
+            _rendered = true; _status = "✔ 完成"; _isError = false;
+        }
+        catch (Exception ex) { _isError = true; _status = $"❌ Render 失敗：{ex.Message}"; }
+        finally { _rendering = false; }
+    }
+
+    private async Task ExportPng()
+    {
+        string fb   = Path.GetFileNameWithoutExtension(_csvFileName ?? "result");
+        string name = $"{fb}_{_selectedParam}_heatmap.png";
+        await JS.InvokeVoidAsync("stripHeatmap.exportPng", "heatmapCanvas", name);
+    }
+}

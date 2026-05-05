@@ -1,0 +1,13 @@
+@inherits LayoutComponentBase
+
+<div class="layout">
+    <nav class="sidebar">
+        <div class="sidebar-title">Strip Heatmap</div>
+        <NavLink href="/"              Match="NavLinkMatch.All" class="nav-link">🗺 Heatmap</NavLink>
+        <NavLink href="/yield-report"  class="nav-link">📊 良率報表</NavLink>
+        <NavLink href="/xls-converter" class="nav-link">🔄 XLS → CSV</NavLink>
+    </nav>
+    <main class="main-content">
+        @Body
+    </main>
+</div>

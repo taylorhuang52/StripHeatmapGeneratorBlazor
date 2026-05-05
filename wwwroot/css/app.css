@@ -1,0 +1,88 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 13px; background: #f5f5f8; }
+
+/* ── Layout ──────────────────────────────────────────────────────────── */
+.layout        { display: flex; min-height: 100vh; }
+.sidebar       { width: 155px; min-width: 155px; background: #1e1e2e;
+                  display: flex; flex-direction: column; padding: 12px 0; }
+.sidebar-title { font-size: 13px; font-weight: 700; color: #89b4fa;
+                  padding: 0 14px 12px; border-bottom: 1px solid #313244; margin-bottom: 6px; }
+.nav-link      { display: block; padding: 7px 14px; color: #cdd6f4;
+                  text-decoration: none; font-size: 13px;
+                  border-left: 3px solid transparent; }
+.nav-link:hover, .nav-link.active
+               { background: #313244; border-left-color: #89b4fa; }
+.main-content  { flex: 1; overflow-x: auto; padding: 14px 18px; background: #f5f5f8; }
+
+/* ── Toolbar ─────────────────────────────────────────────────────────── */
+.toolbar       { display: flex; flex-wrap: wrap; align-items: center;
+                  gap: 8px; padding: 8px 10px; background: #fff;
+                  border-bottom: 1px solid #dde; }
+.toolbar-group { display: flex; align-items: center; gap: 4px; }
+.toolbar-label { font-weight: 600; color: #444; white-space: nowrap; }
+.file-name     { color: #666; font-size: 12px; max-width: 200px;
+                  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-input    { display: none; }
+.select-param  { height: 26px; border: 1px solid #bbb; border-radius: 3px;
+                  padding: 0 6px; min-width: 130px; }
+.limit-input   { width: 70px; height: 26px; border: 1px solid #bbb;
+                  border-radius: 3px; padding: 0 6px; }
+.size-input    { width: 46px; height: 26px; border: 1px solid #bbb;
+                  border-radius: 3px; padding: 0 4px; text-align: center; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+.btn           { height: 28px; padding: 0 12px; border: 1px solid #bbb;
+                  border-radius: 3px; cursor: pointer; font-size: 12px;
+                  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.btn:disabled  { opacity: 0.4; cursor: not-allowed; }
+.btn-browse    { background: #f0f0f0; }
+.btn-browse:hover { background: #e0e0e0; }
+.btn-render    { background: #0078d7; color: #fff; border-color: #0078d7; font-weight: 600; }
+.btn-render:hover:not(:disabled) { background: #006cbf; }
+.btn-export    { background: #107c10; color: #fff; border-color: #107c10; }
+.btn-export:hover:not(:disabled) { background: #0e6a0e; }
+
+/* ── Legend ──────────────────────────────────────────────────────────── */
+.legend        { display: flex; flex-wrap: wrap; gap: 10px;
+                  padding: 5px 10px; background: #fafafa;
+                  border-bottom: 1px solid #eee; font-size: 12px; }
+.legend-item   { display: flex; align-items: center; gap: 4px; }
+.swatch        { width: 14px; height: 12px; display: inline-block; border: 1px solid #ccc; }
+.swatch-border { background: #fff; }
+
+/* ── Status ──────────────────────────────────────────────────────────── */
+.status        { padding: 4px 10px; font-size: 12px; }
+.status-ok     { color: #107c10; background: #f0fff0; }
+.status-error  { color: #c00; background: #fff0f0; }
+
+/* ── Preview ─────────────────────────────────────────────────────────── */
+.preview-area  { padding: 12px; overflow: auto; min-height: 200px; background: #dcdce4; }
+.preview-hint  { color: #aaa; font-size: 16px; padding: 60px 40px; }
+.heatmap-img   { display: block; max-width: 100%; }
+
+/* ── Page headings ───────────────────────────────────────────────────── */
+.page-title    { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 4px; padding: 8px 0 0; }
+.page-desc     { font-size: 12px; color: #888; margin-bottom: 10px; }
+
+/* ── Log ─────────────────────────────────────────────────────────────── */
+.log-box       { background: #1c1c24; color: #c8dcc8; font-family: Consolas, monospace;
+                  font-size: 12px; padding: 10px; margin: 10px 0; border-radius: 4px;
+                  max-height: 280px; overflow-y: auto; white-space: pre-wrap; }
+
+/* ── Yield ───────────────────────────────────────────────────────────── */
+.yield-summary { padding: 7px 10px; font-size: 13px; background: #fff; border-bottom: 1px solid #eee; }
+.yield-summary strong { color: #107c10; font-size: 15px; }
+.yield-chart   { display: flex; align-items: flex-end; gap: 2px; height: 130px;
+                  padding: 6px 10px 2px; background: #fff; border-bottom: 1px solid #eee; }
+.bar-wrap      { display: flex; flex-direction: column; align-items: center;
+                  flex: 1; min-width: 12px; max-width: 38px; height: 100%; }
+.bar           { width: 100%; }
+.bar-label     { font-size: 9px; color: #888; margin-top: 2px;
+                  writing-mode: vertical-rl; transform: rotate(180deg); }
+.yield-table   { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; }
+.yield-table th { background: #e6eaf5; font-weight: 700; padding: 5px 10px;
+                   border-bottom: 2px solid #ccd; text-align: left; }
+.yield-table td { padding: 4px 10px; border-bottom: 1px solid #eee; }
+.row-fail td   { background: #ffb4b4; color: #780000; }
+.row-warn td   { background: #fff5aa; color: #645000; }
+.yield-val     { font-weight: 700; font-family: Consolas, monospace; }

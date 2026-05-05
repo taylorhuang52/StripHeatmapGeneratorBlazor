@@ -1,0 +1,88 @@
+@page "/xls-converter"
+@using StripHeatmapGeneratorBlazor.Services
+@inject XlsConverterService Converter
+@inject IJSRuntime JS
+
+<PageTitle>XLS → CSV 轉換器</PageTitle>
+
+<h2 class="page-title">🔄 XLS → CSV 轉換器</h2>
+<p class="page-desc">支援含 9 行統計標頭的 XLS（04AC / LoggerData 格式）</p>
+
+<div class="toolbar">
+    <div class="toolbar-group">
+        <label class="toolbar-label">XLS 檔案</label>
+        <InputFile OnChange="HandleXlsSelected" accept=".xls" class="file-input" id="xlsInput" />
+        <label for="xlsInput" class="btn btn-browse">瀏覽…</label>
+        <span class="file-name">@(_xlsFileName ?? "未選擇")</span>
+    </div>
+    <button class="btn btn-render" @onclick="ConvertAsync"
+            disabled="@(_xlsBytes is null || _converting)">
+        @if (_converting) { <span>轉換中…</span> } else { <span>🔄 開始轉換</span> }
+    </button>
+    <button class="btn btn-export" @onclick="DownloadCsv"
+            disabled="@(_csvResult is null)">💾 下載 CSV</button>
+</div>
+
+@if (!string.IsNullOrEmpty(_status))
+{
+    <div class="status @(_isError ? "status-error" : "status-ok")">@_status</div>
+}
+
+<!-- Log -->
+@if (!string.IsNullOrEmpty(_log))
+{
+    <pre class="log-box">@_log</pre>
+}
+
+@code {
+    private byte[]?  _xlsBytes;
+    private string?  _xlsFileName;
+    private string?  _csvResult;
+    private string   _log    = "";
+    private string   _status = "";
+    private bool     _isError, _converting;
+
+    private async Task HandleXlsSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        _xlsFileName = file.Name;
+        using var ms = new MemoryStream();
+        await file.OpenReadStream(maxAllowedSize: 100 * 1024 * 1024).CopyToAsync(ms);
+        _xlsBytes = ms.ToArray();
+        _status   = $"✔ 已選擇：{file.Name}  ({_xlsBytes.Length:N0} bytes)";
+        _isError  = false;
+    }
+
+    private async Task ConvertAsync()
+    {
+        if (_xlsBytes is null) return;
+        _converting = true;
+        _status     = "轉換中…";
+        _log        = "";
+        StateHasChanged();
+
+        try
+        {
+            var result  = await Converter.ConvertAsync(_xlsBytes);
+            _csvResult  = result.Csv;
+            _log        = result.Log;
+            _status     = $"✔ 完成！共 {result.Converted} 筆，略過 {result.Skipped} 筆";
+            _isError    = false;
+        }
+        catch (Exception ex)
+        {
+            _isError = true;
+            _status  = $"❌ 轉換失敗：{ex.Message}";
+        }
+        finally { _converting = false; }
+    }
+
+    private async Task DownloadCsv()
+    {
+        if (_csvResult is null) return;
+        string name = Path.GetFileNameWithoutExtension(_xlsFileName ?? "output") + "_converted.csv";
+        var bytes   = System.Text.Encoding.UTF8.GetBytes(_csvResult);
+        string b64  = Convert.ToBase64String(bytes);
+        await JS.InvokeVoidAsync("stripHeatmap.downloadBase64Csv", name, b64);
+    }
+}

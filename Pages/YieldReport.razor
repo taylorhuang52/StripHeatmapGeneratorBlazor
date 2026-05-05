@@ -1,0 +1,125 @@
+@page "/yield-report"
+@using StripHeatmapGeneratorBlazor.Models
+@using StripHeatmapGeneratorBlazor.Services
+@inject CsvParserService       CsvParser
+@inject YieldCalculatorService YieldCalc
+@inject IJSRuntime             JS
+
+<PageTitle>良率報表</PageTitle>
+
+<h2 class="page-title">📊 良率報表</h2>
+
+<div class="toolbar">
+    <div class="toolbar-group">
+        <label class="toolbar-label">CSV 檔案</label>
+        <InputFile OnChange="HandleCsvSelected" accept=".csv" class="file-input" id="yieldCsvInput" />
+        <label for="yieldCsvInput" class="btn btn-browse">瀏覽…</label>
+        <span class="file-name">@(_csvFileName ?? "未選擇")</span>
+    </div>
+    <button class="btn btn-export" @onclick="ExportCsv"
+            disabled="@(!_results.Any())">💾 匯出 CSV</button>
+</div>
+
+@if (!string.IsNullOrEmpty(_status))
+{
+    <div class="status @(_isError ? "status-error" : "status-ok")">@_status</div>
+}
+
+@if (_results.Any())
+{
+    <!-- Summary -->
+    <div class="yield-summary">
+        平均良率：<strong>@(_results.Average(r => r.Yield).ToString("F2")) %</strong>
+        &nbsp;（共 @_results.Count 個 strip）
+        &nbsp;｜ 分母：@HeatmapConfig.StripDieTotal dies/strip
+    </div>
+
+    <!-- Chart -->
+    <div class="yield-chart">
+        @foreach (var r in _results)
+        {
+            double pct = r.Yield;
+            string color = pct >= 95 ? "#32c832"
+                         : pct >= 85 ? "#78c83c"
+                         : pct >= 70 ? "#dcc800"
+                         : pct >= 50 ? "#ff8c00"
+                         :             "#dc3c3c";
+            <div class="bar-wrap" title="#@r.StripId: @r.Yield.ToString("F1")%">
+                <div class="bar" style="height:@(pct)%;background:@color"></div>
+                <div class="bar-label">#@r.StripId</div>
+            </div>
+        }
+    </div>
+
+    <!-- Table -->
+    <table class="yield-table">
+        <thead>
+            <tr>
+                <th>Strip ID</th>
+                <th>量測 Dies</th>
+                <th>Pass</th>
+                <th>Fail</th>
+                <th>良率 (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in _results)
+            {
+                string rowClass = r.Yield < 75 ? "row-fail"
+                                : r.Yield < 90 ? "row-warn" : "";
+                <tr class="@rowClass">
+                    <td>#@r.StripId</td>
+                    <td>@r.MeasuredDies</td>
+                    <td>@r.PassCount</td>
+                    <td>@r.FailCount</td>
+                    <td class="yield-val">@r.Yield.ToString("F2") %</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string?           _csvFileName;
+    private byte[]?           _csvBytes;
+    private List<YieldResult> _results   = new();
+    private string            _status    = "";
+    private bool              _isError;
+
+    private async Task HandleCsvSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        _csvFileName = file.Name;
+        _status      = "讀取中…";
+        StateHasChanged();
+
+        try
+        {
+            using var ms = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024).CopyToAsync(ms);
+            _csvBytes = ms.ToArray();
+
+            var loaded = await CsvParser.ParseAsync(new MemoryStream(_csvBytes));
+            _results   = YieldCalc.Calculate(loaded.FullDies);
+            _status    = $"✔ 已計算 {_results.Count} 個 strip 的良率";
+            _isError   = false;
+        }
+        catch (Exception ex)
+        {
+            _isError = true;
+            _status  = $"❌ {ex.Message}";
+        }
+    }
+
+    private async Task ExportCsv()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("Strip_ID,Measured_Dies,Pass,Fail,Yield(%)");
+        foreach (var r in _results)
+            sb.AppendLine($"{r.StripId},{r.MeasuredDies},{r.PassCount},{r.FailCount},{r.Yield:F2}");
+
+        string b64  = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
+        string name = Path.GetFileNameWithoutExtension(_csvFileName ?? "yield") + "_yield.csv";
+        await JS.InvokeVoidAsync("stripHeatmap.downloadBase64Csv", name, b64);
+    }
+}
