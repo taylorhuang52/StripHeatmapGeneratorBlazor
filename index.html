@@ -10,20 +10,17 @@
 
     <script>
         // SPA redirect receiver for GitHub Pages
-        // Reads the route saved by 404.html and restores it
-        (function (l) {
-            if (l.search[1] === '/') {
-                var decoded = l.search.slice(1).split('&').map(function (s) {
-                    return s.replace(/~and~/g, '&');
-                });
-                window.history.replaceState(
-                    null, null,
-                    l.pathname.slice(0, -1) + decoded[0] +
-                    (decoded[1] ? '?' + decoded[1] : '') +
-                    l.hash
-                );
+        // 404.html redirects with ?p=/route, we restore it here
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var path = params.get('p');
+            if (path) {
+                var newUrl = window.location.pathname + path +
+                    (params.get('q') ? '?' + params.get('q') : '') +
+                    window.location.hash;
+                window.history.replaceState(null, null, newUrl);
             }
-        }(window.location));
+        })();
     </script>
 </head>
 <body>
@@ -35,22 +32,19 @@
     </div>
 
     <script>
-    // ── Strip Heatmap canvas renderer ─────────────────────────────────────
     window.stripHeatmap = {
-
         render: function (spec, canvasId, imgId) {
             var canvas = document.getElementById(canvasId);
             canvas.width  = spec.width;
             canvas.height = spec.height;
             var ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, spec.width, spec.height);
-
             for (var i = 0; i < spec.rects.length; i++) {
                 var r = spec.rects[i];
                 ctx.fillStyle = r.fill;
+                ctx.fillStyle = r.fill;
                 ctx.fillRect(r.x, r.y, r.w, r.h);
             }
-
             for (var j = 0; j < spec.texts.length; j++) {
                 var t = spec.texts[j];
                 ctx.font      = (t.bold ? 'bold ' : '') + t.size + 'px Arial,sans-serif';
@@ -58,22 +52,19 @@
                 ctx.textAlign = t.center ? 'center' : 'left';
                 ctx.fillText(t.text, t.x, t.y);
             }
-
             var img = document.getElementById(imgId);
             if (img) img.src = canvas.toDataURL('image/png');
         },
-
         exportPng: function (canvasId, filename) {
             var canvas = document.getElementById(canvasId);
             var a = document.createElement('a');
-            a.href     = canvas.toDataURL('image/png');
+            a.href = canvas.toDataURL('image/png');
             a.download = filename;
             a.click();
         },
-
         downloadBase64Csv: function (filename, base64) {
             var a = document.createElement('a');
-            a.href     = 'data:text/csv;base64,' + base64;
+            a.href = 'data:text/csv;base64,' + base64;
             a.download = filename;
             a.click();
         }
