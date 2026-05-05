@@ -8,20 +8,18 @@
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="StripHeatmapGeneratorBlazor.styles.css" />
 
-    <script>
-        // SPA redirect receiver for GitHub Pages
-        // 404.html redirects with ?p=/route, we restore it here
-        (function () {
-            var params = new URLSearchParams(window.location.search);
-            var path = params.get('p');
-            if (path) {
-                var newUrl = window.location.pathname + path +
-                    (params.get('q') ? '?' + params.get('q') : '') +
-                    window.location.hash;
-                window.history.replaceState(null, null, newUrl);
-            }
-        })();
-    </script>
+<script>
+    (function () {
+        var params = new URLSearchParams(window.location.search);
+        var path = params.get('p');
+        if (path) {
+            var newUrl = window.location.pathname + path +
+                (params.get('q') ? '?' + params.get('q') : '') +
+                window.location.hash;
+            window.history.replaceState(null, null, newUrl);
+        }
+    })();
+</script>
 </head>
 <body>
     <div id="app">
