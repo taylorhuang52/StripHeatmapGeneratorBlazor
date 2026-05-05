@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8" />
+    <title>Strip Heatmap Generator</title>
+    <script>
+        // SPA redirect for GitHub Pages
+        // Saves the full URL then redirects to index.html
+        // index.html will read it back and navigate to the correct route
+        var pathSegmentsToKeep = 1; // 1 = keep /StripHeatmapGeneratorBlazor/
+
+        var l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?p=/' +
+            l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+            (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+            l.hash
+        );
+    </script>
+</head>
+<body>
+    重新導向中…
+</body>
+</html>
