@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "StripHeatmapGeneratorBlazor",
   "resources": {
-    "hash": "sha256-WuT/mgZE0A9PpmoAXq0WK8K3fWctTg2nmwjzID39DvA=",
+    "hash": "sha256-NOP5GPGgIe0EnUrylaeWvJk3qRI1m2NEzpPCBI3tadY=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.nirmg5lupl.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Web.pmtfexj9ca.wasm": "Microsoft.AspNetCore.Components.Web.wasm",
@@ -32,7 +32,7 @@
       "System.Text.Json.80a5qky8zc.wasm": "System.Text.Json.wasm",
       "System.Text.RegularExpressions.pjhal65ko1.wasm": "System.Text.RegularExpressions.wasm",
       "System.Private.CoreLib.s3kdxaankf.wasm": "System.Private.CoreLib.wasm",
-      "StripHeatmapGeneratorBlazor.lippzv6riv.wasm": "StripHeatmapGeneratorBlazor.wasm",
+      "StripHeatmapGeneratorBlazor.zyqdlulyhp.wasm": "StripHeatmapGeneratorBlazor.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.l1ds2rhypd.js": "dotnet.native.js",
       "dotnet.native.etgrtk5jba.wasm": "dotnet.native.wasm",
@@ -87,7 +87,7 @@
       "System.Text.Encodings.Web.z5osepan0o.wasm": "sha256-qWRckNgJUXP/8BMc9tmHvES2SMAuHimXyFmWjbXrfM8=",
       "System.Text.Json.80a5qky8zc.wasm": "sha256-6AsIhvRYwpAq7dHUqhvKz5Wpw6UCGBkbUXXCTWYmXSk=",
       "System.Text.RegularExpressions.pjhal65ko1.wasm": "sha256-VdTVx7BqfLgxpexvMTkSI3N233xrnZp5GxwrZM9G28k=",
-      "StripHeatmapGeneratorBlazor.lippzv6riv.wasm": "sha256-bUwmBUY3eNgW+hR/kbr0thlOwCcshDQ0TIZmqHyEfm4="
+      "StripHeatmapGeneratorBlazor.zyqdlulyhp.wasm": "sha256-ywa5hr5Epw4chhj5UrNvQ9EN9X52l3eob63qqPJzex4="
     }
   },
   "cacheBootResources": true,
