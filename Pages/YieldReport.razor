@@ -22,19 +22,17 @@
 
 @if (!string.IsNullOrEmpty(_status))
 {
-    <div class="status @(_isError ? "status-error" : "status-ok")">@_status</div>
+    <div class="status @_statusClass">@_status</div>
 }
 
 @if (_results.Any())
 {
-    <!-- Summary -->
     <div class="yield-summary">
         平均良率：<strong>@(_results.Average(r => r.Yield).ToString("F2")) %</strong>
         &nbsp;（共 @_results.Count 個 strip）
         &nbsp;｜ 分母：@HeatmapConfig.StripDieTotal dies/strip
     </div>
 
-    <!-- Chart -->
     <div class="yield-chart">
         @foreach (var r in _results)
         {
@@ -44,14 +42,14 @@
                          : pct >= 70 ? "#dcc800"
                          : pct >= 50 ? "#ff8c00"
                          :             "#dc3c3c";
-            <div class="bar-wrap" title="#@r.StripId: @r.Yield.ToString("F1")%">
+            string tipText = $"#{r.StripId}: {r.Yield:F1}%";
+            <div class="bar-wrap" title="@tipText">
                 <div class="bar" style="height:@(pct)%;background:@color"></div>
                 <div class="bar-label">#@r.StripId</div>
             </div>
         }
     </div>
 
-    <!-- Table -->
     <table class="yield-table">
         <thead>
             <tr>
@@ -85,6 +83,7 @@
     private List<YieldResult> _results   = new();
     private string            _status    = "";
     private bool              _isError;
+    private string            _statusClass => _isError ? "status-error" : "status-ok";
 
     private async Task HandleCsvSelected(InputFileChangeEventArgs e)
     {
@@ -92,13 +91,11 @@
         _csvFileName = file.Name;
         _status      = "讀取中…";
         StateHasChanged();
-
         try
         {
             using var ms = new MemoryStream();
             await file.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024).CopyToAsync(ms);
             _csvBytes = ms.ToArray();
-
             var loaded = await CsvParser.ParseAsync(new MemoryStream(_csvBytes));
             _results   = YieldCalc.Calculate(loaded.FullDies);
             _status    = $"✔ 已計算 {_results.Count} 個 strip 的良率";
@@ -117,7 +114,6 @@
         sb.AppendLine("Strip_ID,Measured_Dies,Pass,Fail,Yield(%)");
         foreach (var r in _results)
             sb.AppendLine($"{r.StripId},{r.MeasuredDies},{r.PassCount},{r.FailCount},{r.Yield:F2}");
-
         string b64  = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
         string name = Path.GetFileNameWithoutExtension(_csvFileName ?? "yield") + "_yield.csv";
         await JS.InvokeVoidAsync("stripHeatmap.downloadBase64Csv", name, b64);

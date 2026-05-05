@@ -71,7 +71,7 @@
 
 @if (!string.IsNullOrEmpty(_status))
 {
-    <div class="status @(_isError ? "status-error" : "status-ok")">@_status</div>
+    <div class="status @_statusClass">@_status</div>
 }
 
 <!-- Off-screen canvas used for rendering; img shows the result -->
@@ -99,6 +99,7 @@
     private int            _cellH    = HeatmapConfig.DefaultCellH;
     private int            _fontSize = HeatmapConfig.DefaultFontSz;
     private bool           _rendered, _rendering, _isError;
+    private string         _statusClass => _isError ? "status-error" : "status-ok";
     private string         _status = "";
 
     private async Task HandleCsvSelected(InputFileChangeEventArgs e)
