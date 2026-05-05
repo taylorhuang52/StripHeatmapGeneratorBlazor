@@ -2,74 +2,24 @@
 <html lang="zh-TW">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Strip Heatmap Generator</title>
-    <base href="/StripHeatmapGeneratorBlazor/" />
-    <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="StripHeatmapGeneratorBlazor.styles.css" />
+    <script>
+        // SPA redirect for GitHub Pages
+        // Saves the full URL then redirects to index.html
+        // index.html will read it back and navigate to the correct route
+        var pathSegmentsToKeep = 1; // 1 = keep /StripHeatmapGeneratorBlazor/
+
+        var l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?p=/' +
+            l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+            (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+            l.hash
+        );
+    </script>
 </head>
 <body>
-    <div id="app">
-        <div style="display:flex;justify-content:center;align-items:center;
-                    height:100vh;font-family:sans-serif;color:#888;font-size:18px">
-            載入中…
-        </div>
-    </div>
-
-    <script>
-    // ── Strip Heatmap canvas renderer ────────────────────────────────────────
-    window.stripHeatmap = {
-
-        render: function (spec, canvasId, imgId) {
-            var canvas = document.getElementById(canvasId);
-            canvas.width  = spec.width;
-            canvas.height = spec.height;
-            var ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, spec.width, spec.height);
-
-            // Draw rects
-            for (var i = 0; i < spec.rects.length; i++) {
-                var r = spec.rects[i];
-                ctx.fillStyle = r.fill;
-                ctx.fillRect(r.x, r.y, r.w, r.h);
-            }
-
-            // Draw texts
-            for (var j = 0; j < spec.texts.length; j++) {
-                var t = spec.texts[j];
-                var weight = t.bold ? 'bold ' : '';
-                ctx.font      = weight + t.size + 'px Arial,sans-serif';
-                ctx.fillStyle = t.fill;
-                if (t.center) {
-                    ctx.textAlign = 'center';
-                } else {
-                    ctx.textAlign = 'left';
-                }
-                ctx.fillText(t.text, t.x, t.y);
-            }
-
-            // Copy canvas to img
-            var img = document.getElementById(imgId);
-            if (img) img.src = canvas.toDataURL('image/png');
-        },
-
-        exportPng: function (canvasId, filename) {
-            var canvas = document.getElementById(canvasId);
-            var a = document.createElement('a');
-            a.href     = canvas.toDataURL('image/png');
-            a.download = filename;
-            a.click();
-        },
-
-        downloadBase64Csv: function (filename, base64) {
-            var a = document.createElement('a');
-            a.href     = 'data:text/csv;base64,' + base64;
-            a.download = filename;
-            a.click();
-        }
-    };
-    </script>
-
-    <script src="_framework/blazor.webassembly.js"></script>
+    重新導向中…
 </body>
 </html>

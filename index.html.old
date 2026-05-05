@@ -7,24 +7,6 @@
     <base href="/StripHeatmapGeneratorBlazor/" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="StripHeatmapGeneratorBlazor.styles.css" />
-
-    <script>
-        // SPA redirect receiver for GitHub Pages
-        // Reads the route saved by 404.html and restores it
-        (function (l) {
-            if (l.search[1] === '/') {
-                var decoded = l.search.slice(1).split('&').map(function (s) {
-                    return s.replace(/~and~/g, '&');
-                });
-                window.history.replaceState(
-                    null, null,
-                    l.pathname.slice(0, -1) + decoded[0] +
-                    (decoded[1] ? '?' + decoded[1] : '') +
-                    l.hash
-                );
-            }
-        }(window.location));
-    </script>
 </head>
 <body>
     <div id="app">
@@ -35,7 +17,7 @@
     </div>
 
     <script>
-    // ── Strip Heatmap canvas renderer ─────────────────────────────────────
+    // ── Strip Heatmap canvas renderer ────────────────────────────────────────
     window.stripHeatmap = {
 
         render: function (spec, canvasId, imgId) {
@@ -45,20 +27,28 @@
             var ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, spec.width, spec.height);
 
+            // Draw rects
             for (var i = 0; i < spec.rects.length; i++) {
                 var r = spec.rects[i];
                 ctx.fillStyle = r.fill;
                 ctx.fillRect(r.x, r.y, r.w, r.h);
             }
 
+            // Draw texts
             for (var j = 0; j < spec.texts.length; j++) {
                 var t = spec.texts[j];
-                ctx.font      = (t.bold ? 'bold ' : '') + t.size + 'px Arial,sans-serif';
+                var weight = t.bold ? 'bold ' : '';
+                ctx.font      = weight + t.size + 'px Arial,sans-serif';
                 ctx.fillStyle = t.fill;
-                ctx.textAlign = t.center ? 'center' : 'left';
+                if (t.center) {
+                    ctx.textAlign = 'center';
+                } else {
+                    ctx.textAlign = 'left';
+                }
                 ctx.fillText(t.text, t.x, t.y);
             }
 
+            // Copy canvas to img
             var img = document.getElementById(imgId);
             if (img) img.src = canvas.toDataURL('image/png');
         },
