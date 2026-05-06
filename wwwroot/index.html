@@ -4,18 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Strip Heatmap Generator</title>
-    <base href="/StripHeatmapGeneratorBlazor/" />
+    <base href="/" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="StripHeatmapGeneratorBlazor.styles.css" />
 
     <script>
-        // SPA redirect receiver for GitHub Pages
-        // 404.html redirects with ?p=/route, we restore it here
+        // SPA redirect receiver - fix double-slash by trimming trailing slash from pathname
         (function () {
             var params = new URLSearchParams(window.location.search);
             var path = params.get('p');
             if (path) {
-                var newUrl = window.location.pathname + path +
+                var base = window.location.pathname.replace(/\/$/, ''); // remove trailing slash
+                var newUrl = base + path +
                     (params.get('q') ? '?' + params.get('q') : '') +
                     window.location.hash;
                 window.history.replaceState(null, null, newUrl);
@@ -41,7 +41,6 @@
             ctx.clearRect(0, 0, spec.width, spec.height);
             for (var i = 0; i < spec.rects.length; i++) {
                 var r = spec.rects[i];
-                ctx.fillStyle = r.fill;
                 ctx.fillStyle = r.fill;
                 ctx.fillRect(r.x, r.y, r.w, r.h);
             }

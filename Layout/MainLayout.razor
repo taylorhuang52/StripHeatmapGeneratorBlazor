@@ -1,11 +1,20 @@
 @inherits LayoutComponentBase
 
-<div class="layout">
+<div class="app-layout">
     <nav class="sidebar">
-        <div class="sidebar-title">Strip Heatmap</div>
-        <NavLink href="/"              Match="NavLinkMatch.All" class="nav-link">🗺 Heatmap</NavLink>
-        <NavLink href="/yield-report"  class="nav-link">📊 良率報表</NavLink>
-        <NavLink href="/xls-converter" class="nav-link">🔄 XLS → CSV</NavLink>
+        <div class="sidebar-title">
+            <span class="sidebar-icon">⬡</span>
+            <span>Strip Heatmap</span>
+        </div>
+        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            🌡 Heatmap
+        </NavLink>
+        <NavLink class="nav-link" href="yield-report">
+            📊 良率報表
+        </NavLink>
+        <NavLink class="nav-link" href="xls-converter">
+            🔄 XLS → CSV
+        </NavLink>
     </nav>
     <main class="main-content">
         @Body
