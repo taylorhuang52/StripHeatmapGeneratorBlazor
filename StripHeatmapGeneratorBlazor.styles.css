@@ -1,49 +1,72 @@
 /* /Layout/MainLayout.razor.rz.scp.css */
-[b-jfba20tqg4] .layout {
+/* ── App shell ──────────────────────────────────────────────── */
+.app-layout[b-jfba20tqg4] {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
-[b-jfba20tqg4] .sidebar {
-    width: 160px;
-    min-width: 160px;
-    background: #1e1e2e;
-    color: #cdd6f4;
+/* ── Sidebar ────────────────────────────────────────────────── */
+.sidebar[b-jfba20tqg4] {
+    width: 180px;
+    flex-shrink: 0;
+    background: #1e2030;
     display: flex;
     flex-direction: column;
-    padding: 16px 0;
+    padding: 0;
+    overflow-y: auto;
 }
 
-[b-jfba20tqg4] .sidebar-title {
-    font-size: 13px;
+.sidebar-title[b-jfba20tqg4] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 14px 14px;
+    font-size: 14px;
     font-weight: 700;
-    color: #89b4fa;
-    padding: 0 16px 16px;
-    border-bottom: 1px solid #313244;
-    margin-bottom: 8px;
+    color: #8ab4f8;
+    border-bottom: 1px solid #2e3250;
+    letter-spacing: 0.3px;
 }
 
-[b-jfba20tqg4] .nav-link {
-    display: block;
-    padding: 8px 16px;
-    color: #cdd6f4;
+.sidebar-icon[b-jfba20tqg4] {
+    font-size: 20px;
+}
+
+/* ── Nav links ──────────────────────────────────────────────── */
+.nav-link[b-jfba20tqg4] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: #b0bcd4;
     text-decoration: none;
     font-size: 13px;
+    font-weight: 500;
     border-left: 3px solid transparent;
+    transition: background 0.15s, color 0.15s;
 }
 
-[b-jfba20tqg4] .nav-link:hover,
-[b-jfba20tqg4] .nav-link.active {
-    background: #313244;
-    border-left-color: #89b4fa;
-    color: #cdd6f4;
+.nav-link:hover[b-jfba20tqg4] {
+    background: #2a2f4a;
+    color: #e0e8ff;
 }
 
-[b-jfba20tqg4] .main-content {
+/* Active state — Blazor adds this class automatically */
+.nav-link.active[b-jfba20tqg4] {
+    background: #2a3a6a;
+    color: #ffffff;
+    border-left-color: #4e90d0;
+    font-weight: 700;
+}
+
+/* ── Main content ───────────────────────────────────────────── */
+.main-content[b-jfba20tqg4] {
     flex: 1;
-    overflow-x: auto;
-    padding: 16px 20px;
+    overflow-y: auto;
     background: #f5f5f8;
+    display: flex;
+    flex-direction: column;
 }
 /* /Layout/NavMenu.razor.rz.scp.css */
 .navbar-toggler[b-t8gnq79dzs] {
